@@ -35,3 +35,4 @@
 .idea
 .vs
 .vscode
+cmake-build-debug
