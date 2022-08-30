@@ -5,7 +5,6 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <ctime>
 #include <iterator>
 
 using std::string;
@@ -14,28 +13,6 @@ using std::endl;
 using std::fstream;
 using std::vector;
 using std::map;
-
-class TimeEntry
-{
-public:
-    string name;
-    string email;
-    string department;
-    string position;
-    string project;
-    string task;
-    string date;
-    int hours;
-    TimeEntry(
-            string name,
-            string email,
-            string department,
-            string position,
-            string project,
-            string task,
-            string date,
-            int hours) : name(std::move(name)), email(std::move(email)), department(std::move(department)), position(std::move(position)), project(std::move(project)), task(std::move(task)), date(std::move(date)), hours(hours) {}
-};
 
 const string months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
@@ -79,23 +56,25 @@ int main(int argc, char* argv[]){
             dates.push_back(value);
         }
 
-        TimeEntry timeEntry = TimeEntry(row[0], row[1], row[2], row[3], row[4], row[5], months[stoi(dates[1])-1] + " " + dates[0], stoi(row[7]));
+        //TimeEntry timeEntry = TimeEntry(row[0], row[1], row[2], row[3], row[4], row[5], months[stoi(dates[1])-1] + " " + dates[0], stoi(row[7]));
 
-        auto name_entry = time_entries_map.find(timeEntry.name);
+        string time_entry_date = months[stoi(dates[1])-1] + " " + dates[0];
+        int time_entry_hours = stoi(row[7]);
+
+        auto name_entry = time_entries_map.find(row[0]);
 
         if(name_entry != time_entries_map.end()){
-            auto date_entry = name_entry->second.find(timeEntry.date);
+            auto date_entry = name_entry->second.find(time_entry_date);
             if(date_entry != name_entry->second.end()){
-                name_entry->second[timeEntry.date] += timeEntry.hours;
+                name_entry->second[time_entry_date] += time_entry_hours;
             }
             else{
-                map<string, int> date_map {{timeEntry.date, timeEntry.hours}};
-                name_entry->second.insert(std::pair<string, int>(timeEntry.date, timeEntry.hours));
+                name_entry->second.insert(std::pair<string, int>(time_entry_date, time_entry_hours));
             }
         }
         else{
-            map<string, int> date_map {{timeEntry.date, timeEntry.hours}};
-            time_entries_map.insert(std::pair<string, map<string, int>>(timeEntry.name, date_map));
+            map<string, int> date_map {{time_entry_date, time_entry_hours}};
+            time_entries_map.insert(std::pair<string, map<string, int>>(row[0], date_map));
         }
     }
 
