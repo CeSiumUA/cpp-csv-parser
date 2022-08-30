@@ -106,10 +106,10 @@ int main(int argc, char* argv[]){
 }
 
 void save_csv(const map<string, map<string, int>>& time_entries_map){
-    for(auto name_iterator = time_entries_map.begin(); name_iterator != time_entries_map.end(); ++name_iterator){
-        auto dates_map = name_iterator->second;
-        for(auto date_iterator = dates_map.begin(); date_iterator != dates_map.end(); ++date_iterator){
-            fileout << name_iterator->first << ";" << date_iterator->first << ";" << date_iterator->second << endl;
+    for(const auto & name_iterator : time_entries_map){
+        auto dates_map = name_iterator.second;
+        for(auto & date_iterator : dates_map){
+            fileout << name_iterator.first << ";" << date_iterator.first << ";" << date_iterator.second << endl;
         }
     }
 }
