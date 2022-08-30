@@ -56,8 +56,6 @@ int main(int argc, char* argv[]){
             dates.push_back(value);
         }
 
-        //TimeEntry timeEntry = TimeEntry(row[0], row[1], row[2], row[3], row[4], row[5], months[stoi(dates[1])-1] + " " + dates[0], stoi(row[7]));
-
         string time_entry_date = months[stoi(dates[1])-1] + " " + dates[0];
         int time_entry_hours = stoi(row[7]);
 
@@ -85,6 +83,7 @@ int main(int argc, char* argv[]){
 }
 
 void save_csv(const map<string, map<string, int>>& time_entries_map){
+    fileout << "Name;Month;Total hours" << endl;
     for(const auto & name_iterator : time_entries_map){
         auto dates_map = name_iterator.second;
         for(auto & date_iterator : dates_map){
