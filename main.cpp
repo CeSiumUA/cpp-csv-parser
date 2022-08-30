@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <ctime>
+#include <iterator>
 
 using std::string;
 using std::cout;
@@ -23,7 +24,7 @@ public:
     string position;
     string project;
     string task;
-    struct tm date;
+    string date;
     int hours;
     TimeEntry(
             string name,
@@ -32,11 +33,13 @@ public:
             string position,
             string project,
             string task,
-            struct tm date,
-            int hours) : name(std::move(name)), email(std::move(email)), department(std::move(department)), position(std::move(position)), project(std::move(project)), task(std::move(task)), date(date), hours(hours) {}
+            string date,
+            int hours) : name(std::move(name)), email(std::move(email)), department(std::move(department)), position(std::move(position)), project(std::move(project)), task(std::move(task)), date(std::move(date)), hours(hours) {}
 };
 
-void update_record(const TimeEntry& timeEntry);
+const string months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+void save_csv(const map<string, map<string, int>>& time_entries_map);
 fstream filein, fileout;
 
 int main(int argc, char* argv[]){
@@ -47,13 +50,15 @@ int main(int argc, char* argv[]){
 
     filein.open(argv[1], std::ios::in);
 
-    fileout.open(argv[2]);
+    fileout.open(argv[2], std::ios::out);
 
     cout << "file contents" << endl;
     cout << endl;
 
     vector<string> row;
     string line, value;
+
+    map<string, map<string, int>> time_entries_map;
 
     getline(filein, line);
 
@@ -67,40 +72,44 @@ int main(int argc, char* argv[]){
         }
         cout << line << endl;
 
-        struct tm tm{};
+        std::stringstream date_str(row[6]);
 
-        if(!strptime(row[6].c_str(), "%Y-%m-%d", &tm)){
-            cout << "date is invalid" << endl;
+        vector<string> dates;
+        while(getline(date_str, value, '-')){
+            dates.push_back(value);
         }
 
-        TimeEntry timeEntry = TimeEntry(row[0], row[1], row[2], row[3], row[4], row[5], tm, stoi(row[7]));
+        TimeEntry timeEntry = TimeEntry(row[0], row[1], row[2], row[3], row[4], row[5], months[stoi(dates[1])-1] + " " + dates[0], stoi(row[7]));
 
-       update_record(timeEntry);
+        auto name_entry = time_entries_map.find(timeEntry.name);
+
+        if(name_entry != time_entries_map.end()){
+            auto date_entry = name_entry->second.find(timeEntry.date);
+            if(date_entry != name_entry->second.end()){
+                name_entry->second[timeEntry.date] += timeEntry.hours;
+            }
+            else{
+                map<string, int> date_map {{timeEntry.date, timeEntry.hours}};
+                name_entry->second.insert(std::pair<string, int>(timeEntry.date, timeEntry.hours));
+            }
+        }
+        else{
+            map<string, int> date_map {{timeEntry.date, timeEntry.hours}};
+            time_entries_map.insert(std::pair<string, map<string, int>>(timeEntry.name, date_map));
+        }
     }
+
+    save_csv(time_entries_map);
 
     filein.close();
     fileout.close();
 }
 
-void update_record(const TimeEntry& timeEntry){
-    string line, value;
-    vector<string> row;
-    while(!fileout.eof()){
-        getline(fileout, line);
-        if(line.empty()){
-            continue;
-        }
-        std::stringstream str(line);
-        while(getline(str, value, ';')){
-            row.push_back(value);
-        }
-        if(row[0] == timeEntry.name){
-            return;
+void save_csv(const map<string, map<string, int>>& time_entries_map){
+    for(auto name_iterator = time_entries_map.begin(); name_iterator != time_entries_map.end(); ++name_iterator){
+        auto dates_map = name_iterator->second;
+        for(auto date_iterator = dates_map.begin(); date_iterator != dates_map.end(); ++date_iterator){
+            fileout << name_iterator->first << ";" << date_iterator->first << ";" << date_iterator->second << endl;
         }
     }
-    fileout.clear();
-    fileout.seekg(-1);
-    fileout << timeEntry.name << ";" << timeEntry.date.tm_year << "-" << timeEntry.date.tm_mon << ";" << timeEntry.hours << endl;
-    fileout.clear();
-    fileout.seekg(0, std::ios_base::beg);
 }
