@@ -29,6 +29,8 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    settings settings = settings::load_from_cmd(argc, argv);
+
     filein.open(argv[1], std::ios::in);
     if(!filein){
         cout << "input file not found or could not be opened" << endl;
