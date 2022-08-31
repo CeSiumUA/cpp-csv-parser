@@ -6,31 +6,32 @@
 #include <vector>
 #include <map>
 #include <iterator>
+#include "parser/cmd_parser.h"
+#include "settings/settings.h"
 
 using std::string;
-using std::cout;
 using std::endl;
 using std::fstream;
 using std::vector;
 using std::map;
+using std::cout;
 
 const string months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 void save_csv(const map<string, map<string, int>>& time_entries_map);
+void print_help();
 fstream filein, fileout;
 
 int main(int argc, char* argv[]){
-    cout << "arguments count: " << argc << endl;
-    for(int x = 1; x < argc; x++){
-        cout << "argument #" << x << ": " << argv[x] << endl;
+
+    if(cmd_parser::is_option_present(argv, argv+argc, "-h")){
+        print_help();
+        return 0;
     }
 
     filein.open(argv[1], std::ios::in);
 
     fileout.open(argv[2], std::ios::out);
-
-    cout << "file contents" << endl;
-    cout << endl;
 
     vector<string> row;
     string line, value;
@@ -47,7 +48,6 @@ int main(int argc, char* argv[]){
         while(getline(str, value, ';')){
             row.push_back(value);
         }
-        cout << line << endl;
 
         std::stringstream date_str(row[6]);
 
@@ -90,4 +90,14 @@ void save_csv(const map<string, map<string, int>>& time_entries_map){
             fileout << name_iterator.first << ";" << date_iterator.first << ";" << date_iterator.second << endl;
         }
     }
+}
+
+void print_help(){
+    cout << "First argument: input csv file, Second argument: output csv file" << endl;
+    cout << "Optional flags:" << endl;
+    cout << "\t-d set delimiter. Example: -d ;" << endl;
+    cout << "\t-e set to use headers (skip first row of input file)" << endl;
+    cout << "\t-v set to print logs to output (default stdout)" << endl;
+    cout << "\t-r set to redirect output to specified in -rp file instead console. Similar to >> in cli" << endl;
+    cout << "\t-rp set output path. Example: -rp /dev/null" << endl;
 }
