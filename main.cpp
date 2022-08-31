@@ -30,8 +30,16 @@ int main(int argc, char* argv[]){
     }
 
     filein.open(argv[1], std::ios::in);
+    if(!filein){
+        cout << "input file not found or could not be opened" << endl;
+        return 1;
+    }
 
     fileout.open(argv[2], std::ios::out);
+    if(!fileout){
+        cout << "output file could not be written" << endl;
+        return 1;
+    }
 
     vector<string> row;
     string line, value;
