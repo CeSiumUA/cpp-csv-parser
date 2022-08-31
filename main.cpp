@@ -18,7 +18,7 @@ using std::cout;
 
 const string months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-void save_csv(const map<string, map<string, int>>& time_entries_map);
+void save_csv(const map<string, map<string, int>>& time_entries_map, bool write_headers);
 void print_help();
 fstream filein, fileout;
 
@@ -28,6 +28,8 @@ int main(int argc, char* argv[]){
         print_help();
         return 0;
     }
+
+    cout << "run with -h to view all available arguments" << endl;
 
     settings settings = settings::load_from_cmd(argc, argv);
 
@@ -48,14 +50,16 @@ int main(int argc, char* argv[]){
 
     map<string, map<string, int>> time_entries_map;
 
-    getline(filein, line);
+    if(settings.use_headers) {
+        getline(filein, line);
+    }
 
     while (!filein.eof()){
         row.clear();
 
         getline(filein, line);
         std::stringstream str(line);
-        while(getline(str, value, ';')){
+        while(getline(str, value, settings.delimiter)){
             row.push_back(value);
         }
 
@@ -86,14 +90,16 @@ int main(int argc, char* argv[]){
         }
     }
 
-    save_csv(time_entries_map);
+    save_csv(time_entries_map, settings.use_headers);
 
     filein.close();
     fileout.close();
 }
 
-void save_csv(const map<string, map<string, int>>& time_entries_map){
-    fileout << "Name;Month;Total hours" << endl;
+void save_csv(const map<string, map<string, int>>& time_entries_map, bool write_headers){
+    if(write_headers) {
+        fileout << "Name;Month;Total hours" << endl;
+    }
     for(const auto & name_iterator : time_entries_map){
         auto dates_map = name_iterator.second;
         for(auto & date_iterator : dates_map){
