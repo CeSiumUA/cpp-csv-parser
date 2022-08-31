@@ -11,7 +11,9 @@ using std::optional;
 
 const string delimiter_flag = "-d";
 const string use_headers_flag = "-e";
+const string ignore_headers_flag = "-i";
 const string verbose_flag = "-v";
+const string silence_flag = "-s";
 const string redirect_output_flag = "-r";
 const string redirect_output_path_flag = "-rp";
 
@@ -20,7 +22,7 @@ public:
     char delimiter = ';';
     bool use_headers = true;
     bool verbose = true;
-    bool redirect_output = true;
+    bool redirect_output = false;
     string redirect_output_path;
     static settings load_from_cmd(int argv_count, char* argv_begin[]);
 };

@@ -15,9 +15,15 @@ settings settings::load_from_cmd(int argv_count, char* argv_begin[]) {
     if(cmd_parser::is_option_present(argv_begin, argv_begin + argv_count, use_headers_flag)){
         settings.use_headers = true;
     }
+    else if(cmd_parser::is_option_present(argv_begin, argv_begin + argv_count, ignore_headers_flag)){
+        settings.use_headers = false;
+    }
 
     if(cmd_parser::is_option_present(argv_begin, argv_begin + argv_count, verbose_flag)){
         settings.verbose = true;
+    }
+    else if(cmd_parser::is_option_present(argv_begin, argv_begin + argv_count, silence_flag)){
+        settings.verbose = false;
     }
 
     if(cmd_parser::is_option_present(argv_begin, argv_begin + argv_count, redirect_output_flag)){
